@@ -156,7 +156,41 @@ function ath_getlist($ids=null) {
 	return $r;
 }
 
+/* User Interface */
 
+add_filter('the_content', 'ath_box_append', 1);
+add_action('wp_head', 'ath_box_header');
+
+function ath_box_append($content) {
+	if(is_single()) {
+		$id = get_the_ID();
+		$athlist = get_post_meta($id, ATH_POSTMETAKEY, true);
+		$athdata = ath_getlist(is_array($athlist) ? $athlist : array());
+		$template = get_option(ATH_HTMLKEY, ATH_DEFAULTHTML);
+		foreach($athdata as $id=>$info) {
+			foreach($info as $k=>$v)
+				$info[$k] = htmlentities($v);
+			extract($info, EXTR_PREFIX_ALL, 'a');
+			/* Set up special path variable */
+			$a_path = plugins_url("",__FILE__);
+			$a_postsby_link = get_term_link(intval($a_termid), ATH_TAXNAME);
+			if(is_wp_error($a_postsby_link))
+				$a_postsby_link = get_bloginfo('url').'?'.ATH_TAXNAME.'='.$a_termid;
+			$pid = get_the_ID();
+			
+			$content .= '<div class="ath-desc">'.preg_replace('/\${([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)}/e', '$a_\1', $template).'</div>';
+		}
+	}
+	return $content;
+}
+
+function ath_box_header() {
+	if(is_single()) {
+		print('<style type="text/css">');
+			print(htmlentities(get_option(ATH_CSSKEY, ATH_DEFAULTCSS)));
+		print('</style>');
+	}
+}
 
 /* Administrative Interface */
 
@@ -232,6 +266,36 @@ function ath_update_form($id) {
 	print("</table>");
 }
 
+/*
+	Function for parsing author form author management.
+*/
+function ath_store_forminfo($opts_json) {
+	if(strlen(trim($opts_json)) > 0) {
+		$aths = ath_getlist();
+		$opts = json_decode($opts_json, true);
+		if(is_array($opts)) {
+			/* Create new authors */
+			$newauths = $opts[-1];
+			if(is_array($newauths)) {
+				foreach($newauths as $info)
+					if(ath_check_info($info)===true)
+						ath_create($info);
+			}
+			unset($opts[-1]);
+			/* Update authors */
+			foreach($opts as $id=>$info) {
+				if($info["deleteflag"]===true) {
+					ath_update($id, NULL);
+					wp_delete_term($aths[$id]['termid'], ATH_TAXNAME);
+				}else {
+					ath_safe_updateinfo($id,$info);
+				}
+			}
+		}
+	}
+	/* Don't store anything */
+	return NULL;
+}
 
 /*
 	Function for parsing post author selection.
