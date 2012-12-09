@@ -180,6 +180,25 @@ function ath_reset() {
 	);
 }
 
+/* Abstract category layer */
+
+add_filter('get_terms', 'ath_filter_athterms');
+//add_action('init', 'ath_taxonomy_register');
+
+function ath_filter_athterms($terms) {
+	$sig = sprintf(ATH_TAXSTRFMT,"");
+	foreach($terms as $i=>$term)
+		if($term->taxonomy==ATH_TAXNAME && !strncmp($term->slug,$sig,strlen($sig)))
+			unset($terms[$i]);
+	return $terms;
+}
+
+function ath_taxonomy_register() {
+	/* Setting object type to NULL prevents it from showing up in the admin 'post' panel */
+	register_taxonomy(ATH_TAXNAME, 'post',
+		array('label'=>_('Authors'), 'rewrite'=>array('slug'=>ATH_TAXNAME), 'query_var'=>ATH_TAXNAME, 'public'=>true)
+	);
+}
 
 /* User Interface */
 
