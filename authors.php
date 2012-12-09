@@ -205,6 +205,16 @@ function ath_meta_boxes_init() {
 	add_meta_box('authors_postath', __('Choose an author'), 'ath_selection_post_form', 'post');
 }
 
+function ath_menu_init() {
+	add_submenu_page('tools.php', "Author Profiles", "Author Profiles", "edit_theme_options", "authors_profiles_edit", 'ath_profiles_edit_page');
+}
+
+function ath_settings_parser_init() {
+	register_setting(ATH_SETTINGSKEY, 'p', 'ath_store_forminfo');
+	register_setting(ATH_SETTINGSKEY, 's', 'ath_store_miscinfo');
+	register_setting(ATH_SETTINGSKEY, 'rst', 'ath_reset_form');
+}
+
 function ath_load_admin_js() {
 	wp_enqueue_script('ath_admin_js', plugins_url('admin.js', __FILE__), array('jquery'));
 	wp_enqueue_script('ba-bbq', plugins_url('jquery.ba-bbq.min.js', __FILE__), array('jquery'));
@@ -264,6 +274,57 @@ function ath_update_form($id) {
 		print('</td></tr>');
 	}
 	print("</table>");
+}
+
+function ath_profiles_edit_page() {
+	$min_id = is_numeric($_GET['min_id']) ? $_GET['min_id'] : 0;
+	$c = is_numeric($_GET['c']) ? $_GET['c'] : ATH_LIST_PER_PAGE;
+	$auths = ath_getlist();
+	$ids = array_keys($auths); sort($ids);
+	foreach($ids as $i=>$id)
+		if($id >= $min_id) {
+			$keys = array_slice($ids, $i, $c);
+			$r = array();
+			foreach($keys as $id)
+				$r[$id] = $auths[$id];
+			$auths = $r;
+			break;
+		}
+	if(!is_array($keys)) {
+		/* Nothing on list */
+		if(count($ids)%$c > 0)
+			$i = count($ids)-count($ids)%$c;
+		else
+			$i = count($ids)-$c;
+		$auths = array();
+	}else {
+		$i = $i-$c-$c%2;
+		if(!is_array($auths))
+			$auths = array();
+	}
+	printf('<script type="text/javascript">window.authinfo=%s;window.authlastid=%d;</script>', json_encode((object)$auths), $ids[$i]);
+	print('<form action="options.php" id="ath-prof-form" method="POST">');
+		printf('<div class="cloak" style="display:none"></div>');
+		settings_fields(ATH_SETTINGSKEY);
+		print('<input type="hidden" name="p" id="ath-info-encoded"/>');
+		if(count($auths) == 0 || $min_id <= min($ids)):
+		print('<div>');
+			printf('<div class="ath-html">HTML Template<textarea name="s[ath-html]">%s</textarea></div>', htmlentities(get_option(ATH_HTMLKEY,ATH_DEFAULTHTML)));
+			printf('<div class="ath-css">CSS<textarea name="s[ath-css]">%s</textarea></div>', htmlentities(get_option(ATH_CSSKEY,ATH_DEFAULTCSS)));
+		print('<div style="clear:both"></div></div>');
+		endif;
+		print('<div class="new-ath-box" style="display:none">');
+				ath_update_form(-1);
+				print('<a class="ath-new-winclose">Close</a>');
+		print('</div>');
+		print('<table id="ath-table">');
+			print('<tr class="ath-entry" style="display:none"><td class="ath-name"></td><td><a class="ath-edit-btn"><input type="hidden" class="ath-id"/>Edit</a></td><td><a class="ath-del-btn"><input type="hidden" class="ath-id"/>Delete</a></td></tr>');
+		print('</table>');
+		print('<a class="ath-create-btn">New Author</a>');
+		print('<a id="last-page-btn">Last Page</a><a id="next-page-btn">Next Page</a>');
+		print('<input type="submit" name="rst" class="rst-btn" value="Reset"/>');
+		print('<input type="submit" class="submit-btn" value="Save"/>');
+	print('</form>');
 }
 
 /*

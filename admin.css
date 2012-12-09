@@ -1,0 +1,121 @@
+.new-ath-box{
+	display:none;
+	position:fixed;
+	 top:20%;
+	 left:20%;
+	width:60%;
+	height:60%;
+	background:rgba(255,255,255,0.9);
+	z-index: 20;
+	padding: 40px;
+}
+
+.new-ath-box table,
+.new-ath-box tbody,
+.new-ath-box tr {
+	width: 100%;
+	display: block;
+}
+
+.new-ath-box .label-col,
+#ath-table .new-ath-box .label-col{
+	width: 20%;
+	display: inline-block;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.new-ath-box .input-col,
+#ath-table .new-ath-box .input-col {
+	display: inline-block;
+	width: 79%;
+}
+
+.new-ath-box .input-col *,
+#ath-table .new-ath-box .input-col * {
+	width: 100%;
+}
+
+#ath-table {
+	width: 100%;
+	margin-bottom: 40px;
+}
+
+#ath-table td {
+	width: 33%;
+	display: inline-block;
+	text-align: center;
+}
+
+.input-col textarea {
+	height: 70px;
+}
+
+.new-ath-box .ath-new-winclose {
+	display: block;
+	width: 120px;
+	margin: auto auto;
+}
+
+.cloak{
+	display: block;
+	position: fixed;
+	 top: 0px;
+	 right: 0px;
+	 left: 0px;
+	 bottom: 0px;
+	background: rgba(0,0,0,0.7);
+	z-index: 10;
+}
+
+.ath-prof-form {
+	width: 100%;
+	position: relative;
+	margin: 20px 40px 20px 40px;
+}
+
+.ath-html,
+.ath-css {
+	position: relative;
+	 width: 49%;
+	 height: 120px;
+	float: left;
+	display: block;
+	margin-bottom: 40px;
+}
+
+.ath-html textarea,
+.ath-css textarea {
+	width: 100%;
+	height: 90%;
+	padding: 0px;
+	margin: 0px;
+}
+
+.ath-create-btn {
+	display: block;
+	width: 120px;
+	margin: auto auto;
+	text-align: center;
+	padding: 0px;
+}
+
+#next-page-btn,
+#last-page-btn {
+	width: 49%;
+	display: inline-block;
+	margin: 0px;
+	padding: 0px;
+}
+#next-page-btn {
+	text-align: right;
+}
+#last-page-btn {
+	text-align: left;
+}
+
+.submit-btn {
+	display: block;
+	width: 120px;
+	margin: auto auto;
+}
