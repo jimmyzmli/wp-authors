@@ -156,6 +156,31 @@ function ath_getlist($ids=null) {
 	return $r;
 }
 
+function ath_reset() {
+	global $wpdb;
+	delete_option(ATH_OPTKEY);
+	delete_option(ATH_MAXIDKEY);
+	delete_option(ATH_CSSKEY);
+	delete_option(ATH_HTMLKEY);
+	$wpdb->query(
+		$wpdb->prepare(sprintf("DELETE FROM $wpdb->postmeta WHERE meta_key = '%s'", ATH_POSTMETAKEY))
+	);
+	$wpdb->query(
+		$wpdb->prepare(
+			sprintf("DELETE FROM $wpdb->term_relationships WHERE term_taxonomy_id IN (SELECT term_taxonomy_id FROM $wpdb->term_taxonomy WHERE taxonomy='%s')", ATH_TAXNAME)
+		)
+	);
+	$wpdb->query(
+		$wpdb->prepare(
+			sprintf("DELETE FROM $wpdb->terms WHERE term_id IN (SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy='%s'", ATH_TAXNAME)
+		)
+	);
+	$wpdb->query(
+		$wpdb->prepare(sprintf("DELETE FROM $wpdb->term_taxonomy WHERE taxonomy='%s'", ATH_TAXNAME))
+	);
+}
+
+
 /* User Interface */
 
 add_filter('the_content', 'ath_box_append', 1);
@@ -325,6 +350,24 @@ function ath_profiles_edit_page() {
 		print('<input type="submit" name="rst" class="rst-btn" value="Reset"/>');
 		print('<input type="submit" class="submit-btn" value="Save"/>');
 	print('</form>');
+}
+
+function ath_reset_form($opt) {
+	if(strlen(trim($opt)) > 0)
+		ath_reset();
+}
+
+/*
+	Function for parsing misc settings
+*/
+function ath_store_miscinfo($opts) {
+	if(is_array($opts)) {
+		if(array_key_exists('ath-html',$opts) && is_string($opts['ath-html']))
+			update_option(ATH_HTMLKEY, $opts['ath-html']);
+		if(array_key_exists('ath-css',$opts) && is_string($opts['ath-css']))
+			update_option(ATH_CSSKEY, $opts['ath-css']);
+	}
+	return NULL;
 }
 
 /*
